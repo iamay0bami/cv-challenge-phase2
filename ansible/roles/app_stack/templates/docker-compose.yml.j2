@@ -1,0 +1,66 @@
+version: "3.8"
+services:
+  traefik:
+    image: traefik:v2.10
+    container_name: traefik
+    user: "0:0"
+    environment:
+      - DOCKER_API_VERSION=1.44
+    command:
+      - "--api.insecure=true"
+      - "--api.dashboard=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=true"
+      - "--providers.docker.endpoint=unix:///var/run/docker.sock"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    networks:
+      - web_net
+
+  cv-db:
+    image: postgres:14
+    container_name: cv-db
+    environment:
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: changethis123
+      POSTGRES_DB: app
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app_net
+
+  cv-backend:
+    image: {{ docker_username }}/backend:latest
+    container_name: cv-backend
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend.rule=PathPrefix(`/api`)"
+      - "traefik.http.routers.backend.entrypoints=web"
+      - "traefik.http.services.backend.loadbalancer.server.port=8000"
+    networks:
+      - app_net
+      - web_net
+
+  cv-frontend:
+    image: {{ docker_username }}/frontend:latest
+    container_name: cv-frontend
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.rule=PathPrefix(`/`)"
+      - "traefik.http.routers.frontend-router.priority=1"
+      - "traefik.http.services.frontend.loadbalancer.server.port=80"
+    networks:
+      - web_net
+
+networks:
+  web_net:
+    external: true
+  app_net:
+    driver: bridge
+
+volumes:
+  postgres_data:
