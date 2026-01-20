@@ -1,12 +1,15 @@
 ---
+- name: Copy Nginx frontend config
+  copy:
+    src: nginx.default.conf
+    dest: /home/ubuntu/nginx.default.conf
+
 - name: Copy Docker Compose template
   template:
     src: docker-compose.yml.j2
-    dest: /home/ubuntu/app-docker-compose.yml
+    dest: /home/ubuntu/docker-compose.yml
 
 - name: Deploy Application Stack
   community.docker.docker_compose_v2: 
     project_src: /home/ubuntu/
-    files:
-      - app-docker-compose.yml
     state: present
