@@ -6,3 +6,4 @@
   roles:
     - common
     - app_stack
+    - monitoring_stack

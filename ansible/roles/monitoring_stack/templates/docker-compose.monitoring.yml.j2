@@ -1,0 +1,86 @@
+services:
+  cv-prometheus:
+    image: prom/prometheus:latest
+    container_name: cv-prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--web.external-url=http://{{ ansible_host }}/prometheus/"
+      - "--web.route-prefix=/prometheus"
+    volumes:
+      - /home/ubuntu/monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    networks:
+      - web_net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.prometheus.rule=Host(`{{ ansible_host }}`) && PathPrefix(`/prometheus`)"
+      - "traefik.http.services.prometheus.loadbalancer.server.port=9090"
+
+  cv-grafana:
+    image: grafana/grafana:latest
+    container_name: cv-grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=A1y2o3b4a5m6i7
+      - GF_SERVER_ROOT_URL=http://{{ ansible_host }}/grafana/
+      - GF_SERVER_SERVE_FROM_SUB_PATH=true
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - /home/ubuntu/monitoring/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+      - /home/ubuntu/monitoring/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - /home/ubuntu/monitoring/dashboards:/var/lib/grafana/dashboards:ro
+    networks:
+      - web_net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.grafana.rule=Host(`{{ ansible_host }}`) && PathPrefix(`/grafana`)"
+      - "traefik.http.services.grafana.loadbalancer.server.port=3000"
+
+  cv-loki:
+    image: grafana/loki:2.9.0
+    container_name: cv-loki
+    command: -config.file=/etc/loki/config.yml
+    volumes:
+      - /home/ubuntu/monitoring/loki-config.yml:/etc/loki/config.yml:ro
+      - loki_data:/loki
+    networks:
+      - web_net
+
+  cv-promtail:
+    image: grafana/promtail:2.9.0
+    container_name: cv-promtail
+    command: -config.file=/etc/promtail/promtail-config.yml
+    volumes:
+      - /home/ubuntu/monitoring/promtail-config.yml:/etc/promtail/promtail-config.yml:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - web_net
+
+  cv-cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: cv-cadvisor
+    privileged: true
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    networks:
+      - web_net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.cadvisor.rule=Host(`{{ ansible_host }}`) && PathPrefix(`/cadvisor`)"
+      - "traefik.http.services.cadvisor.loadbalancer.server.port=8080"
+      - "traefik.http.middlewares.cadvisor-strip.stripprefix.prefixes=/cadvisor"
+      - "traefik.http.routers.cadvisor.middlewares=cadvisor-strip"
+
+networks:
+  web_net:
+    external: true
+
+volumes:
+  prometheus_data:
+  grafana_data:
+  loki_data:

@@ -1,0 +1,42 @@
+---
+- name: Create monitoring and provisioning directories
+  file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+    - /home/ubuntu/monitoring
+    - /home/ubuntu/monitoring/provisioning/datasources
+    - /home/ubuntu/monitoring/provisioning/dashboards
+    - /home/ubuntu/monitoring/dashboards
+
+- name: Deploy main configuration files
+  template:
+    src: "{{ item.src }}"
+    dest: "/home/ubuntu/monitoring/{{ item.dest }}"
+  loop:
+    - { src: 'prometheus.yml.j2', dest: 'prometheus.yml' }
+    - { src: 'loki-config.yml.j2', dest: 'loki-config.yml' }
+    - { src: 'promtail-config.yml.j2', dest: 'promtail-config.yml' }
+    - { src: 'docker-compose.monitoring.yml.j2', dest: 'docker-compose.yml' }
+
+- name: Deploy Grafana provisioning
+  template:
+    src: "{{ item.src }}"
+    dest: "/home/ubuntu/monitoring/provisioning/{{ item.dest }}"
+  loop:
+    - { src: 'datasources.yml.j2', dest: 'datasources/datasources.yml' }
+    - { src: 'dashboards.yml.j2', dest: 'dashboards/dashboards.yml' }
+
+
+- name: Copy dashboard JSON files
+  copy:
+    src: dashboards/  
+    dest: /home/ubuntu/monitoring/dashboards/
+    mode: '0644'
+
+- name: Start Monitoring Stack
+  community.docker.docker_compose_v2:
+    project_src: /home/ubuntu/monitoring
+    state: present
+    recreate: always
+    remove_orphans: yes

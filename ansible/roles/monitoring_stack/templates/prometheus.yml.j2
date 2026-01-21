@@ -1,0 +1,17 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: "prometheus"
+    metrics_path: /prometheus/metrics
+    static_configs:
+      - targets: ["cv-prometheus:9090"]
+
+  - job_name: "cadvisor"
+    static_configs:
+      - targets: ["cv-cadvisor:8080"]
+
+  - job_name: "app_backend"
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["cv-backend:8000"]
