@@ -15,7 +15,8 @@ The deployment follows a modular architecture where Terraform handles the cloud 
 
 ## Architecture Diagram
 
-_Insert your architecture diagram image here_
+<img width="1024" height="559" alt="image" src="https://github.com/user-attachments/assets/681146c7-c3d7-4b3e-8d6f-6e1be4d81474" />
+
 
 ## Core Components
 
