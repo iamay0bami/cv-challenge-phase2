@@ -10,6 +10,8 @@ To provision the AWS infrastructure, configure the server, and deploy all servic
 ```bash
 terraform apply -auto-approve
 ```
+---
+
 **Architecture**
 The deployment follows a modular architecture where Terraform handles the cloud layer and hands off the configuration to Ansible via a dynamic inventory.
 
@@ -17,6 +19,7 @@ The deployment follows a modular architecture where Terraform handles the cloud 
 
 <img width="1024" height="559" alt="image" src="https://github.com/user-attachments/assets/681146c7-c3d7-4b3e-8d6f-6e1be4d81474" />
 
+---
 
 ## Core Components
 
@@ -40,6 +43,8 @@ The deployment follows a modular architecture where Terraform handles the cloud 
   - **Visualization:** Grafana  
     *(Pre-configured with data sources and dashboards)*
 
+---
+
 ## Project Structure
 
 ```
@@ -58,12 +63,16 @@ The deployment follows a modular architecture where Terraform handles the cloud 
 └── README.md
 ```
 
+---
+
 ## Prerequisites
 
 - **Terraform** installed locally.
 - **Ansible** installed locally.
 - **AWS CLI** configured with valid credentials.
 - **SSH Key Pair** (Managed automatically by the Terraform logic).
+
+---
 
 ##  Implementation Highlights & Challenges
 
