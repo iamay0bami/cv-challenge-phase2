@@ -32,10 +32,25 @@
     filename: docker
     update_cache: yes
 
-- name: Install Docker Engine and Compose Plugin
+
+- name: Unhold Docker packages to allow version changes
+  ansible.builtin.shell: apt-mark unhold docker-ce docker-ce-cli
+  ignore_errors: yes
+
+- name: Install specific Docker Version (v27) and allow downgrade
   apt:
-    name: [docker-ce, docker-ce-cli, containerd.io, docker-compose-plugin]
+    name: 
+      - "docker-ce=5:27.5.1-1~ubuntu.24.04~noble"
+      - "docker-ce-cli=5:27.5.1-1~ubuntu.24.04~noble"
+      - "containerd.io"
+      - "docker-compose-plugin"
     state: present
+    allow_downgrade: yes
+    update_cache: yes
+
+- name: Hold Docker versions to prevent auto-upgrade to v29
+  ansible.builtin.shell: apt-mark hold docker-ce docker-ce-cli
+
 
 - name: Add ubuntu user to docker group
   user:

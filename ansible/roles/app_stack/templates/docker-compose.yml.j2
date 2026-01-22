@@ -3,6 +3,8 @@ services:
     image: traefik:v3.1
     container_name: traefik
     restart: always
+    environment:
+      - DOCKER_API_VERSION=1.41
     command:
       - "--api.insecure=true"
       - "--api.dashboard=true"

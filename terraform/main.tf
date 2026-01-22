@@ -92,7 +92,33 @@ resource "aws_eip" "static_ip" {
 resource "local_file" "ansible_inventory" {
   content  = <<EOT
 [webserver]
-${aws_eip.static_ip.public_ip} ansible_user=ubuntu ansible_ssh_private_key_file=key.pem
+${aws_eip.static_ip.public_ip} ansible_user=ubuntu ansible_ssh_private_key_file=${abspath(local_file.private_key.filename)}
 EOT
   filename = "${path.module}/../ansible/inventory.ini"
+}
+
+resource "null_resource" "run_ansible" {
+  depends_on = [
+    aws_eip.static_ip,
+    local_file.ansible_inventory,
+    local_file.private_key
+  ]
+
+  provisioner "remote-exec" {
+    inline = ["echo 'Server is up!'"]
+
+    connection {
+      type        = "ssh"
+      user        = "ubuntu"
+      private_key = tls_private_key.ssh_key.private_key_pem
+      host        = aws_eip.static_ip.public_ip
+    }
+  }
+
+  provisioner "local-exec" {
+    command = <<EOT
+      export ANSIBLE_HOST_KEY_CHECKING=False
+      ansible-playbook -i ${local_file.ansible_inventory.filename} ${path.module}/../ansible/playbook.yml
+    EOT
+  }
 }
