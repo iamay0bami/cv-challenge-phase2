@@ -5,7 +5,7 @@ This repository contains the complete automation suite for provisioning cloud in
 ---
 
 ## The "One-Command" Deployment
-To provision the AWS infrastructure, configure the server, and deploy all services, run the following from the root directory:
+To provision the AWS infrastructure, configure the server, and deploy all services, run the following from the terraform directory:
 
 ```bash
 terraform apply -auto-approve
