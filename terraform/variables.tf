@@ -1,3 +1,9 @@
+variable "grafana_cloud_token" {
+  description = "The Access Policy Token for Grafana Cloud"
+  type        = string
+  sensitive   = true  # This hides the token in your terminal logs
+}
+
 variable "aws_region" {
     default = "us-east-1"
 }

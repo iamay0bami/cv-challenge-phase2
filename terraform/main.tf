@@ -8,7 +8,7 @@ provider "aws" {
 }
 
 resource "aws_security_group" "web_sg" {
-  name        = "phase2-web-sg"
+  name        = "phase2-web-sg-cloud"
   description = "Allow SSH, Web, and Traefik Dashboard"
 
   ingress {
@@ -57,7 +57,7 @@ resource "tls_private_key" "ssh_key" {
 }
 
 resource "aws_key_pair" "generated_key" {
-  key_name   = "phase2-key"
+  key_name   = "phase2-key-cloud"
   public_key = tls_private_key.ssh_key.public_key_openssh
 }
 
@@ -118,7 +118,7 @@ resource "null_resource" "run_ansible" {
   provisioner "local-exec" {
     command = <<EOT
       export ANSIBLE_HOST_KEY_CHECKING=False
-      ansible-playbook -i ${local_file.ansible_inventory.filename} ${path.module}/../ansible/playbook.yml
+      ansible-playbook -i ${local_file.ansible_inventory.filename} ${path.module}/../ansible/playbook.yml -e "grafana_cloud_token=${var.grafana_cloud_token}"
     EOT
   }
 }

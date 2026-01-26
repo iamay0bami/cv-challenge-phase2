@@ -17,36 +17,6 @@ services:
       - "traefik.http.routers.prometheus.rule=Host(`{{ ansible_host }}`) && PathPrefix(`/prometheus`)"
       - "traefik.http.services.prometheus.loadbalancer.server.port=9090"
 
-  cv-grafana:
-    image: grafana/grafana:latest
-    container_name: cv-grafana
-    environment:
-      - GF_SECURITY_ADMIN_USER=admin
-      - GF_SECURITY_ADMIN_PASSWORD=A1y2o3b4a5m6i7
-      - GF_SERVER_ROOT_URL=http://{{ ansible_host }}/grafana/
-      - GF_SERVER_SERVE_FROM_SUB_PATH=true
-    volumes:
-      - grafana_data:/var/lib/grafana
-      - /home/ubuntu/monitoring/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
-      - /home/ubuntu/monitoring/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
-      - /home/ubuntu/monitoring/dashboards:/var/lib/grafana/dashboards:ro
-    networks:
-      - web_net
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.grafana.rule=Host(`{{ ansible_host }}`) && PathPrefix(`/grafana`)"
-      - "traefik.http.services.grafana.loadbalancer.server.port=3000"
-
-  cv-loki:
-    image: grafana/loki:2.9.0
-    container_name: cv-loki
-    command: -config.file=/etc/loki/config.yml
-    volumes:
-      - /home/ubuntu/monitoring/loki-config.yml:/etc/loki/config.yml:ro
-      - loki_data:/loki
-    networks:
-      - web_net
-
   cv-promtail:
     image: grafana/promtail:2.9.0
     container_name: cv-promtail
@@ -82,5 +52,3 @@ networks:
 
 volumes:
   prometheus_data:
-  grafana_data:
-  loki_data:
