@@ -38,3 +38,11 @@ terraform.rc
 
 ansible/key.pem
 *.pem
+
+# Ignore specific AWS CLI example files
+terraform/aws/dist/awscli/examples/guardduty/get-findings.rst
+terraform/aws/dist/awscli/examples/sts/get-session-token.rst
+terraform/aws/dist/awscli/examples/greengrass/create-connector-definition-version.rst
+
+# Ignore Ansible variables that contain secrets
+ansible/roles/monitoring_stack/vars/main.yml
